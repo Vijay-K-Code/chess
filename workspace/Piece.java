@@ -44,74 +44,70 @@ public class Piece {
 
     // Returns a list of squares controlled by this piece
     public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-        return getLegalMoves(board, start);
-    }
+        ArrayList<Square> controlledSquares = new ArrayList<>();
 
-    // Returns an ArrayList of legal moves for the piece
-    public ArrayList<Square> getLegalMoves(Square[][] board, Square start) {
-        ArrayList<Square> moves = new ArrayList<>();
-
+        // Add squares controlled by the piece based on its type
         switch (type) {
             case "King":
-                moves.addAll(getKingMoves(board, start));
+                controlledSquares.addAll(getKingControlledSquares(board, start));
                 break;
             case "Queen":
-                moves.addAll(getRookMoves(board, start));
-                moves.addAll(getBishopMoves(board, start));
+                controlledSquares.addAll(getRookControlledSquares(board, start));
+                controlledSquares.addAll(getBishopControlledSquares(board, start));
                 break;
             case "Bishop":
-                moves.addAll(getBishopMoves(board, start));
+                controlledSquares.addAll(getBishopControlledSquares(board, start));
                 break;
             case "Knight":
-                moves.addAll(getKnightMoves(board, start));
+                controlledSquares.addAll(getKnightControlledSquares(board, start));
                 break;
             case "Pawn":
-                moves.addAll(getPawnMoves(board, start));
+                controlledSquares.addAll(getPawnControlledSquares(board, start));
                 break;
             case "ModifiedRook":
-                moves.addAll(getModifiedRookMoves(board, start));
+                controlledSquares.addAll(getModifiedRookControlledSquares(board, start));
                 break;
             default:
-                moves.addAll(getRookMoves(board, start));
+                controlledSquares.addAll(getRookControlledSquares(board, start));
         }
 
-        return moves;
+        return controlledSquares;
     }
 
-    // Returns legal moves for a king (one square in any direction)
-    private ArrayList<Square> getKingMoves(Square[][] board, Square start) {
-        ArrayList<Square> moves = new ArrayList<>();
+    // Helper methods for each piece's control logic
+
+    // King controls one square in any direction
+    private ArrayList<Square> getKingControlledSquares(Square[][] board, Square start) {
+        ArrayList<Square> controlled = new ArrayList<>();
         int row = start.getRow();
         int col = start.getCol();
 
-        int[] directions = {-1, 0, 1};
-
+        int[] directions = {-1, 0, 1}; // Possible moves in each direction
         for (int dRow : directions) {
             for (int dCol : directions) {
-                if (dRow == 0 && dCol == 0) continue;
+                if (dRow == 0 && dCol == 0) continue; // Skip the square it's currently on
                 int newRow = row + dRow;
                 int newCol = col + dCol;
                 if (isValidMove(board, newRow, newCol)) {
-                    moves.add(board[newRow][newCol]);
+                    controlled.add(board[newRow][newCol]);
                 }
             }
         }
-        return moves;
+        return controlled;
     }
 
-    // Returns legal moves for a rook (horizontal & vertical)
-    private ArrayList<Square> getRookMoves(Square[][] board, Square start) {
-        return getSlidingMoves(board, start, new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}});
+    // Queen controls squares like a rook and a bishop combined
+    private ArrayList<Square> getRookControlledSquares(Square[][] board, Square start) {
+        return getSlidingControlledSquares(board, start, new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}});
     }
 
-    // Returns legal moves for a bishop (diagonal movement)
-    private ArrayList<Square> getBishopMoves(Square[][] board, Square start) {
-        return getSlidingMoves(board, start, new int[][]{{1, 1}, {-1, -1}, {1, -1}, {-1, 1}});
+    private ArrayList<Square> getBishopControlledSquares(Square[][] board, Square start) {
+        return getSlidingControlledSquares(board, start, new int[][]{{1, 1}, {-1, -1}, {1, -1}, {-1, 1}});
     }
 
-    // Returns legal moves for a knight (L-shape movement)
-    private ArrayList<Square> getKnightMoves(Square[][] board, Square start) {
-        ArrayList<Square> moves = new ArrayList<>();
+    // Knight controls squares in an "L" shape
+    private ArrayList<Square> getKnightControlledSquares(Square[][] board, Square start) {
+        ArrayList<Square> controlled = new ArrayList<>();
         int row = start.getRow();
         int col = start.getCol();
 
@@ -124,29 +120,29 @@ public class Piece {
             int newRow = row + jump[0];
             int newCol = col + jump[1];
             if (isValidMove(board, newRow, newCol)) {
-                moves.add(board[newRow][newCol]);
+                controlled.add(board[newRow][newCol]);
             }
         }
-        return moves;
+        return controlled;
     }
 
-    // Returns legal moves for a pawn (forward movement, captures diagonally)
-    private ArrayList<Square> getPawnMoves(Square[][] board, Square start) {
-        ArrayList<Square> moves = new ArrayList<>();
+    // Pawn controls squares diagonally for captures
+    private ArrayList<Square> getPawnControlledSquares(Square[][] board, Square start) {
+        ArrayList<Square> controlled = new ArrayList<>();
         int row = start.getRow();
         int col = start.getCol();
-        int direction = color ? -1 : 1;
+        int direction = color ? -1 : 1; // Direction of movement (up for white, down for black)
 
-        if (isValidMove(board, row + direction, col)) {
-            moves.add(board[row + direction][col]);
-        }
-        return moves;
+        // Pawns capture diagonally
+        if (isValidMove(board, row + direction, col + 1)) controlled.add(board[row + direction][col + 1]);
+        if (isValidMove(board, row + direction, col - 1)) controlled.add(board[row + direction][col - 1]);
+
+        return controlled;
     }
 
-    // **CUSTOM PIECE: Modified Rook**
-    // Moves like a rook but only up to 3 spaces in any direction (no jumping over pieces)
-    private ArrayList<Square> getModifiedRookMoves(Square[][] board, Square start) {
-        ArrayList<Square> moves = new ArrayList<>();
+    // Modified Rook controls squares up to 3 spaces in each direction
+    private ArrayList<Square> getModifiedRookControlledSquares(Square[][] board, Square start) {
+        ArrayList<Square> controlled = new ArrayList<>();
         int row = start.getRow();
         int col = start.getCol();
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
@@ -156,18 +152,16 @@ public class Piece {
                 int newRow = row + i * dir[0];
                 int newCol = col + i * dir[1];
 
-                if (!isValidMove(board, newRow, newCol)) break; // Stop if out of bounds or blocked
-                moves.add(board[newRow][newCol]);
-
-                if (board[newRow][newCol].isOccupied()) break; // Stop if there's a piece
+                if (!isValidMove(board, newRow, newCol)) break;
+                controlled.add(board[newRow][newCol]);
             }
         }
-        return moves;
+        return controlled;
     }
 
-    // Helper function for sliding moves (bishop & rook)
-    private ArrayList<Square> getSlidingMoves(Square[][] board, Square start, int[][] directions) {
-        ArrayList<Square> moves = new ArrayList<>();
+    // Helper method for sliding pieces (rook, bishop, and queen)
+    private ArrayList<Square> getSlidingControlledSquares(Square[][] board, Square start, int[][] directions) {
+        ArrayList<Square> controlled = new ArrayList<>();
         int row = start.getRow();
         int col = start.getCol();
 
@@ -177,12 +171,10 @@ public class Piece {
                 int newCol = col + i * dir[1];
 
                 if (!isValidMove(board, newRow, newCol)) break;
-                moves.add(board[newRow][newCol]);
-
-                if (board[newRow][newCol].isOccupied()) break;
+                controlled.add(board[newRow][newCol]);
             }
         }
-        return moves;
+        return controlled;
     }
 
     // Checks if a move is within bounds and valid
