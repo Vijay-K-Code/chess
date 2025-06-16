@@ -56,10 +56,10 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 
     // Sets up rooks for each player
     private void initializePieces() {
-        board[0][0].put(new Piece(false, RESOURCES_BROOK_PNG)); // Black Rook
-        board[0][7].put(new Piece(false, RESOURCES_BROOK_PNG)); // Black Rook
-        board[7][0].put(new Piece(true, RESOURCES_WROOK_PNG));  // White Rook
-        board[7][7].put(new Piece(true, RESOURCES_WROOK_PNG));  // White Rook
+        board[0][0].put(new Rook(false, RESOURCES_BROOK_PNG)); // Black Rook
+        board[0][7].put(new Rook(false, RESOURCES_BROOK_PNG)); // Black Rook
+        board[7][0].put(new Rook(true, RESOURCES_WROOK_PNG));  // White Rook
+        board[7][7].put(new Rook(true, RESOURCES_WROOK_PNG));  // White Rook
     }
 
     public Square[][] getSquareArray() {
