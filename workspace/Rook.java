@@ -1,150 +1,97 @@
-//Spencer Gilcrest
-//This Piece is a Rook
-//The Piece can move straight in all 4 directions for any distance, but cannot move past other peices
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+//Vijay Kannan
+//Custom Rook!
+//Special rook can move straight (up/down/left/right) like a normal rook, but it’s limited to just 3 spaces max in any direction.
+
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
-import javax.imageio.ImageIO;
+public class Rook extends Piece {
 
-//you will need to implement two functions in this file.
-public class Rook extends Piece{
-    
+
     public Rook(boolean isWhite, String img_file) {
         super(isWhite, img_file);
     }
 
-    public String toString(){
-      boolean checkColor = this.getColor();
-      String result;
-      if (checkColor){
-        result = "A White Rook";
-      }
-      else {
-        result = "A Black Rook";
-      }
-      return result;
-        
+    // Just a toString so I can see which rook this is when I need to
+    public String toString() {
+        return this.getColor() ? "A White Rook" : "A Black Rook";
     }
-        
-    // TO BE IMPLEMENTED!
-    //return a list of every square that is "controlled" by this piece. A square is controlled
-    //if the piece capture into it legally.
 
-    //pre condition: board is 2d array of squares. start is a square and been initialized.
-    //post condition: returns arrayList of squares that the piece could theorhetically capture into on the next move
+    // This method returns the squares the rook *controls* (like attacking range)
+    // Still straight lines, but only up to 3 squares in each direction
     public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-     ArrayList<Square> controlledSquares = new ArrayList<>();
-    int boardSize = board.length;
-    int startRow = start.getRow();
-    int startCol = start.getCol();
+        ArrayList<Square> controlledSquares = new ArrayList<>();
+        int row = start.getRow();
+        int col = start.getCol();
+        int boardSize = board.length;
 
-    for (int row = startRow - 1; row>=0;  row--){
-      controlledSquares.add(board[row][startCol]);
-      if (board[row][startCol].getOccupyingPiece() != null){
-        break;
-      }
+        int[][] directions = {
+            {-1, 0}, // up
+            {1, 0},  // down
+            {0, -1}, // left
+            {0, 1}   // right
+        };
+
+        for (int[] dir : directions) {
+            for (int i = 1; i <= 3; i++) {
+                int newRow = row + dir[0] * i;
+                int newCol = col + dir[1] * i;
+
+                // Make sure we don’t go off the board
+                if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize)
+                    break;
+
+                Square sq = board[newRow][newCol];
+                controlledSquares.add(sq);
+
+                // Stop if we hit another piece
+                if (sq.isOccupied())
+                    break;
+            }
+        }
+
+        return controlledSquares;
     }
 
-    for (int row = startRow + 1; row<boardSize;  row++){
-      controlledSquares.add(board[row][startCol]);
-      if (board[row][startCol].getOccupyingPiece() != null){
-        break;
-      }
-    }
+    // This is the method that returns actual legal moves (like where I can really move)
+    // Same logic as controlled squares, but I can’t move onto my own team
+    public ArrayList<Square> getLegalMoves(Board b, Square start) {
+        ArrayList<Square> legalMoves = new ArrayList<>();
+        int row = start.getRow();
+        int col = start.getCol();
+        Square[][] board = b.getSquareArray();
+        boolean isWhite = this.getColor();
+        int boardSize = board.length;
 
-    for (int col = startCol - 1; col>=0; col--){
-      controlledSquares.add(board[startRow][col]);
-      if (board[startRow][col].getOccupyingPiece() != null){
-        break;
-      }
-    }
+        int[][] directions = {
+            {-1, 0}, // up
+            {1, 0},  // down
+            {0, -1}, // left
+            {0, 1}   // right
+        };
 
-    for (int col = startCol + 1; col < boardSize; col++){
-      controlledSquares.add(board[startRow][col]);
-      if (board[startRow][col].getOccupyingPiece() != null){
-        break;
-      }
-    }
-    return controlledSquares;
-    }
-    
+        for (int[] dir : directions) {
+            for (int i = 1; i <= 3; i++) {
+                int newRow = row + dir[0] * i;
+                int newCol = col + dir[1] * i;
 
-    //TO BE IMPLEMENTED!
-    //implement the move function here
-    //it's up to you how the piece moves, but at the very least the rules should be logical and it should never move off the board!
-    //returns an arraylist of squares which are legal to move to
-    //please note that your piece must have some sort of logic. Just being able to move to every square on the board is not
-    //going to score any points.
+                if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize)
+                    break;
 
-    //pre condition: b is of type board and has been properly initialized. start is of type square and has been properly initialized.
-    //post condition: returns arrayList of possible moves such that the piece moves like a rook. moves straight in all 4 directions and cannot pass over other pieces. 
-    public ArrayList<Square> getLegalMoves(Board b, Square start){
-      ArrayList<Square> legalMoves = new ArrayList<>();
-      int currentRow = start.getRow();
-      int currentCol = start.getCol();
+                Square sq = board[newRow][newCol];
 
-      Square[][] board  = b.getSquareArray();
-      int boardSize = board.length;
-
-      boolean isWhite = this.getColor();
-
-      for (int col = currentCol + 1; col < boardSize; col++){
-        Square tempSquare = board[currentRow][col];
-        if (tempSquare.getOccupyingPiece() == null){
-          legalMoves.add(tempSquare);
+                if (!sq.isOccupied()) {
+                    legalMoves.add(sq); // Empty square, I can move here
+                } else {
+                    // Enemy piece , I can capture it
+                    if (sq.getOccupyingPiece().getColor() != isWhite) {
+                        legalMoves.add(sq);
+                    }
+                    // Stop here no matter what if it's occupied
+                    break;
+                }
+            }
         }
-        else {
-          if(tempSquare.isOccupied() && tempSquare.getOccupyingPiece().getColor() != isWhite){
-            legalMoves.add(tempSquare);
-          }
-          break;
-        }
-      }
 
-      for (int col = currentCol - 1; col >=0; col--){
-        Square tempSquare = board[currentRow][col];
-        if (tempSquare.getOccupyingPiece() == null){
-          legalMoves.add(tempSquare);
-        }
-        else {
-          if(tempSquare.isOccupied() && tempSquare.getOccupyingPiece().getColor() != isWhite){
-            legalMoves.add(tempSquare);
-          }
-          break;
-        }
-      }
-
-      for (int row = currentRow - 1; row >= 0; row--){
-        Square tempSquare = board[row][currentCol];
-        if (tempSquare.getOccupyingPiece() == null){
-          legalMoves.add(tempSquare);
-        }
-        else{
-          if (tempSquare.isOccupied() && tempSquare.getOccupyingPiece().getColor() != isWhite){
-            legalMoves.add(tempSquare);
-          }
-          break;
-        }
-      }
-
-      for (int row = currentRow + 1; row < boardSize; row++){
-        Square tempSquare = board[row][currentCol];
-        if (tempSquare.getOccupyingPiece() == null){
-          legalMoves.add(tempSquare);
-        }
-        else{
-          if (tempSquare.isOccupied() && tempSquare.getOccupyingPiece().getColor() != isWhite){
-            legalMoves.add(tempSquare);
-          }
-          break;
-        }
-      }
-      return legalMoves;
+        return legalMoves;
     }
 }
