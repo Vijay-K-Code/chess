@@ -1,98 +1,112 @@
+//Name: Anthony
+//Piece: Pawn
+//Description: Can move one square forward, or two squares if on the starting column. Captures forward diagnaolly. 
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
-
-//NAME: Nailah George
-//PIECE NAME: widow (pawn)
-//DESCRIPTION:  a widow that moves and attacks every 2 squares infont and behind it if the space is available 
-//(if it's not occupied its own color)
-
-public class Pawn extends Piece {
-     
+//you will need to implement two functions in this file.
+public class Pawn extends Piece{
+    
     public Pawn(boolean isWhite, String img_file) {
-        super(isWhite, img_file);
-        
-        color = isWhite;
-  
- 
-        try {
-            if (this.img == null) {
-              this.img = ImageIO.read(getClass().getResource(img_file));
-            }
-          } catch (IOException e) {
-            System.out.println("File not found: " + e.getMessage());
-          }
-      }
-    
-    
-        //pre-condition: a starting square and a piece
-    //post-condition: highlighted squares
-    public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-     ArrayList<Square> controlledSquares = new ArrayList<>();
-
-     int row = start.getRow();
-     int col = start.getCol();
-
-     int[][] moveableAreas = {
-      {-2, -2}, {-2,2},
-        {2,-2}, {2,2}
-     };
-     
-     for (int[] offset: moveableAreas) {
-      int newRow = row + offset[0];
-      int newCol = col + offset[1];
-
-      if(newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-        controlledSquares.add(board[newRow][newCol]);
-      }
-
+        super (isWhite, img_file);
     }
-    return controlledSquares;
-  }
+
     
-
-  // pre-condition:a row and a column
-    //post-condition: highlighted squares of only where the piece can attack when available
-
-    public ArrayList<Square> getLegalMoves(Board b, Square start){
-    	ArrayList<Square> moves = new ArrayList<Square>();
-
-      int row = start.getRow();
-      int col = start.getCol();
-
-      int[][] moveOffsets = {
-        {-2, -2}, {-2,2},
-        {2,-2}, {2,2}
-      };
-
-      for (int[] offset: moveOffsets) {
-        int newRow = row + offset[0];
-        int newCol = col + offset[1];
-
-        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-          Square targetSquare = b.getSquareArray()[newRow][newCol];
-
-          if(!targetSquare.isOccupied()) {
-            moves.add(targetSquare);
-          } else {
-            Piece targetPiece = targetSquare.getOccupyingPiece();
-            if (targetPiece != null && targetPiece.getColor() != this.color) {
-              moves.add(targetSquare);
-            }
+    
+    // TO BE IMPLEMENTED!
+    //return a list of every square that is "controlled" by this piece. A square is controlled
+    //if the piece capture into it legally.
+    //Pre-Condition: Takes into two argument, the board itself alongside the starting square for the piece. User must click on this piece.
+    //Post-condition: Returns a list of tiles which the piece we are currently looking at controls.
+    public ArrayList<Square> getControlledSquares(Square [][] board, Square start) {
+      ArrayList<Square> tile = new ArrayList<Square>(); 
+      if (color == true){
+      if(start.getCol() != 7){
+        tile.add(board[start.getRow() - 1][start.getCol() + 1]);
+        }
+      if (start.getCol() != 0){
+        tile.add(board[start.getRow() - 1][start.getCol() - 1]);
+      }
+    }
+      if (color == false){
+        if(start.getCol() != 7){
+          tile.add(board[start.getRow() + 1][start.getCol() + 1]);
           }
+        if (start.getCol() != 0){
+          tile.add(board [start.getRow() + 1][start.getCol() - 1]);
         }
       }
-      
-      return moves;
+      return tile;
     }
+    
 
-    @Override
-    public String toString() {
-    if (color)
-    return "white";
-    else
-    return "black";
-}
+    //TO BE IMPLEMENTED!
+    //implement the move function here
+    //it's up to you how the piece moves, but at the very least the rules should be logical and it should never move off the board!
+    //returns an arraylist of squares which are legal to move to
+    //please note that your piece must have some sort of logic. Just being able to move to every square on the board is not
+    //going to score any points.
+
+    //Pre-Condition: Takes in the board itself, alongside the starting square of the piece. This piece must be a pawn. User must click on this piece.
+    //Post-Condition: Will return a list of legal moves, which from the current postion the pawn can move to.
+  
+    public ArrayList<Square> getLegalMoves(Board b, Square start){
+      ArrayList<Square> tile = new ArrayList<Square>(); 
+      if(color == true){
+      //if moving for the first time 
+      int potential = start.getRow();
+      potential = potential - 1;
+      if(b.getSquareArray()[potential][start.getCol()].isOccupied() == false){
+        tile.add(b.getSquareArray()[potential][start.getCol()]);
+        }
+      if (start.getRow() == 6){
+        potential = potential - 1;
+        if(b.getSquareArray()[potential][start.getCol()].isOccupied() == false){
+          tile.add(b.getSquareArray()[potential][start.getCol()]);
+          }
+      }
+      if (start.getCol() != 0 && b.getSquareArray()[start.getRow() - 1][start.getCol() - 1].isOccupied() && b.getSquareArray()[start.getRow() - 1][start.getCol() - 1].getOccupyingPiece().getColor() == false) {
+          tile.add(b.getSquareArray()[start.getRow() - 1][start.getCol() - 1]);
+      }
+      if (start.getCol() != 7 && b.getSquareArray()[start.getRow() - 1][start.getCol() + 1].isOccupied() && b.getSquareArray()[start.getRow() - 1][start.getCol() + 1].getOccupyingPiece().getColor() == false) {
+        tile.add(b.getSquareArray()[start.getRow() - 1][start.getCol() + 1]);
+    }
+      
+    }
+    if(color == false){
+      //if moving for the first time
+      int potential = start.getRow();
+      potential = potential + 1;
+      if(b.getSquareArray()[potential][start.getCol()].isOccupied() == false){
+        tile.add(b.getSquareArray()[potential][start.getCol()]);
+        }
+      if (start.getRow() == 1){
+        potential = potential + 1;
+        if(b.getSquareArray()[potential][start.getCol()].isOccupied() == false){
+          tile.add(b.getSquareArray()[potential][start.getCol()]);
+          }
+      }
+      if (start.getCol() != 0 && b.getSquareArray()[start.getRow() + 1][start.getCol() - 1].isOccupied() && b.getSquareArray()[start.getRow() + 1][start.getCol()- 1].getOccupyingPiece().getColor() == true) {
+        tile.add(b.getSquareArray()[start.getRow() + 1][start.getCol() - 1]);
+    }
+    if (start.getCol() != 7 && b.getSquareArray()[start.getRow() + 1][start.getCol() + 1].isOccupied() && b.getSquareArray()[start.getRow() + 1][start.getCol() + 1].getOccupyingPiece().getColor() == true) {
+      tile.add(b.getSquareArray()[start.getRow() + 1][start.getCol() + 1]);
+  }
+    }
+    
+    return tile;
+  }
+  //Pre-condition: A pawn is moved
+  //Post-condtion: Returns a string, stating the color of the pawn which just moved. 
+  public String toString(){
+    return "A " + color + " pawn";
+  }
 }
