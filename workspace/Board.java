@@ -36,11 +36,13 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 
         // Initialize squares (Alternating black and white)
         for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                board[row][col] = new Square(row, col, (row + col) % 2 == 0 ? Color.WHITE : Color.GRAY);
-                this.add(board[row][col]);
-            }
-        }
+    for (int col = 0; col < 8; col++) {
+        boolean isWhite = (row + col) % 2 == 0;
+        board[row][col] = new Square(this, isWhite, row, col); // 'this' refers to the Board instance
+        this.add(board[row][col]);
+    }
+}
+
 
         initializePieces();
 
@@ -117,7 +119,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         Square endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
 
         if (currPiece != null && fromMoveSquare != null && endSquare != null) {
-            ArrayList<Square> legalMoves = currPiece.getLegalMoves(board, fromMoveSquare);
+            ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
             
             if (legalMoves.contains(endSquare)) {
                 endSquare.put(currPiece); // Move piece to new square
