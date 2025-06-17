@@ -205,7 +205,7 @@ public class GameWindow {
                 		
                 		// this is the only section you really need to modify (although you're certainly welcome to mess
                 		//with the rest of the file, but do so at your own peril)
-                        " <<<<<<<<<<<<<<<Your instructions go here>>>>>>>>>",
+                        " Move pieces by clicking on them and then clicking on the square you want them to move to. Take pieces by clicking on them after your piece. The game ends when one side's king cannot move anywhere and is in check. Good luck!",
                         
                         
                         

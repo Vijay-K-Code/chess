@@ -155,9 +155,9 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     @Override
 public void mouseReleased(MouseEvent e) {
     if ((currPiece.color==true)&&(!whiteTurn)||(currPiece.color==false)&&(whiteTurn)){
-
+return;
     } else{
-        // If it's white's turn and the piece is white, do nothing
+        
         
     }
     Square endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
