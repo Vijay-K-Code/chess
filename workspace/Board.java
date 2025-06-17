@@ -154,6 +154,12 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     // Moves the piece only if the move is legal
     @Override
 public void mouseReleased(MouseEvent e) {
+    if ((currPiece.color==true)&&(!whiteTurn)||(currPiece.color==false)&&(whiteTurn)){
+
+    } else{
+        // If it's white's turn and the piece is white, do nothing
+        
+    }
     Square endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
 
     if (currPiece != null && fromMoveSquare != null && endSquare != null) {
@@ -188,6 +194,7 @@ public void mouseReleased(MouseEvent e) {
     currPiece = null;
     repaint();
 }
+
 
 
     public boolean isInCheck(boolean kingColor) {
